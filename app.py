@@ -14,6 +14,7 @@ def all_philosopher():
     result = dh.run_statement('CALL show_all_philosopher()')
     # checks to see if result is a list
     if(type(result) == list):
+        # https response, 200 = success, 400 = fail
         return make_response(json.dumps(result, default=str), 200)
     
     else:
@@ -43,6 +44,45 @@ def add_new_philosopher():
       
     else:
         return make_response(json.dumps(result, default=str), 400)
+
+@app.get('/api/quote')
+# return all quotes, quote's id, philosopher's name from a given philosopher's id
+def all_quote_by_philosopher_id():
+    id = request.args.get('id')
+    # checking to see if each value that is entered by client is a str, if not it stops there
+    valid_check = a.check_endpoint_info(request.args, ['id'])
+    if(type(valid_check) == str):
+        return valid_check
+
+    result = dh.run_statement('CALL show_quote_by_id(?)', [id])
+    # checks to see if result is a list
+    if(type(result) == list):
+        # https response, 200 = success, 400 = fail
+        return make_response(json.dumps(result, default=str), 200)
+    
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+@app.post('/api/quote')
+# using philosopher id insert content into quote table and return id of quote
+def insert_quote():
+    id = request.json.get('id')
+    content = request.json.get('content')
+ 
+    # checking to see if each value that is entered by client is a str, if not it stops there
+    valid_check = a.check_endpoint_info(request.json, ['id', 'content'])
+    if(type(valid_check) == str):
+        return valid_check
+
+    result = dh.run_statement('CALL insert_quote(?,?)', [id, content])
+    if(type(result) == list):
+        
+        # http response 200 = success, 400 = connection problem
+        return make_response(json.dumps(result, default=str), 200)
+      
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
         
 
 app.run(debug=True)
